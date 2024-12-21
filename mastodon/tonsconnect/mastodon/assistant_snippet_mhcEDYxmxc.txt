@@ -1,0 +1,1 @@
+1|cd /Users/botega/itbg_app/mastodon/tonsconnect/common && mkdir -p constants types utils interfaces 
