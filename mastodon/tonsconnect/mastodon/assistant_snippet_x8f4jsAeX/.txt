@@ -1,1 +1,0 @@
-1|cd /Users/botega/itbg_app/mastodon/tonsconnect/frontend/web && npm install next react react-dom && cd ../mobile && npm install react-native && cd ../../backend && npm install express mongoose 

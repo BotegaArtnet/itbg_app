@@ -1,1 +1,0 @@
-1|cd /Users/botega/itbg_app/mastodon/tonsconnect/ai && mkdir -p vector-db embeddings notebooks llm 
