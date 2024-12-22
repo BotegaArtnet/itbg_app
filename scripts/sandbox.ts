@@ -1,68 +1,74 @@
-import { CodeSandbox } from "@codesandbox/sdk";
+import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
+
+const API_KEY = 'csb_v1_LGHxb3YvEwgTX0XXidmJtWu-39gg6Agk5AiAO7y2s9w';
+const API_URL = 'https://codesandbox.io/api/v1/sandboxes/define';
+
+interface SandboxResponse {
+  sandbox_id: string;
+}
+
+const REQUIRED_FILES = [
+  'src/app/layout.tsx',
+  'src/app/page.tsx',
+  'src/app/globals.css',
+  'package.json',
+  'tsconfig.json',
+  'tailwind.config.js',
+];
 
 async function main() {
-  const sdk = new CodeSandbox("csb_v1_LGHxb3YvEwgTX0XXidmJtWu-39gg6Agk5AiAO7y2s9w");
+  try {
+    console.log('Preparing files...');
+    const files: { [key: string]: { content: string } } = {};
 
-  // Create a sandbox
-  console.log("Creating sandbox...");
-  const sandbox = await sdk.sandbox.create({
-    template: "next",
-  });
+    // Read only the required files
+    for (const filePath of REQUIRED_FILES) {
+      try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        files[filePath] = { content };
+        console.log(`Added ${filePath}`);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.warn(`Warning: Could not read ${filePath}: ${error.message}`);
+        }
+      }
+    }
 
-  // Install dependencies
-  console.log("Installing dependencies...");
-  await sandbox.shells.run("npm install framer-motion @headlessui/react");
+    const parameters = {
+      files,
+      template: 'node',
+      title: 'ITBG App',
+      description: 'A modern web application'
+    };
 
-  // Copy project files
-  console.log("Setting up project files...");
-  
-  // Create directories
-  await sandbox.shells.run("mkdir -p src/app src/components/Navigation");
+    console.log('Deploying to CodeSandbox...');
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify(parameters)
+    });
 
-  // Copy files
-  await sandbox.fs.writeTextFile(
-    "src/app/layout.tsx",
-    `import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import Navbar from '@/components/Navigation/Navbar'
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Deployment failed: ${response.statusText}\n${errorText}`);
+    }
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'ITBG',
-  description: 'A minimalist web application',
+    const result = await response.json() as SandboxResponse;
+    console.log('Deployment successful!');
+    console.log(`Sandbox URL: https://codesandbox.io/s/${result.sandbox_id}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Deployment failed:', error.message);
+    } else {
+      console.error('Deployment failed with unknown error');
+    }
+    process.exit(1);
+  }
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en" className="h-full bg-white">
-      <body className={\`\${inter.className} antialiased\`}>
-        <Navbar />
-        <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          {children}
-        </main>
-      </body>
-    </html>
-  )
-}`
-  );
-
-  // Start the development server
-  console.log("Starting development server...");
-  const dev = sandbox.shells.run("npm run dev");
-
-  // Wait for port to open
-  const portInfo = await sandbox.ports.waitForPort(3000);
-  console.log("Server is running!");
-  console.log(`Preview URL: ${portInfo.getPreviewUrl()}`);
-
-  // Keep the process running
-  process.stdin.resume();
-}
-
-main().catch(console.error); 
+main(); 

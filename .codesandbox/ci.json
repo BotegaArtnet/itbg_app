@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "startCommand": "npm run dev",
+  "sandboxes": ["next"]
+} 

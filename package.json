@@ -24,7 +24,8 @@
     "react-dom": "latest"
   },
   "devDependencies": {
-    "@types/node": "latest",
+    "@types/node": "^22.10.2",
+    "@types/node-fetch": "^2.6.12",
     "@types/react": "latest",
     "@types/react-dom": "^19.0.2",
     "@typescript-eslint/eslint-plugin": "latest",
@@ -32,6 +33,7 @@
     "autoprefixer": "latest",
     "eslint": "latest",
     "eslint-config-next": "latest",
+    "node-fetch": "^3.3.2",
     "postcss": "latest",
     "prettier": "latest",
     "tailwindcss": "latest",
